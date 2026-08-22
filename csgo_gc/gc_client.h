@@ -40,6 +40,12 @@ private:
     void NameBaseItem(GCMessageRead &messageRead);
     void RemoveItemName(GCMessageRead &messageRead);
 
+    // --- New mission/operation handlers ---
+    void OnClientRequestNewMission(GCMessageRead &messageRead);
+    void OnClientRedeemMissionReward(GCMessageRead &messageRead);
+    void OnGC2ClientInitSystem(GCMessageRead &messageRead);
+    void OnClient2GCRequestPrestigeCoin(GCMessageRead &messageRead);
+
     void BuildMatchmakingHello(CMsgGCCStrike15_v2_MatchmakingGC2ClientHello &message);
     void BuildClientWelcome(CMsgClientWelcome &message, const CMsgCStrike15Welcome &csWelcome,
         const CMsgGCCStrike15_v2_MatchmakingGC2ClientHello &matchmakingHello);
