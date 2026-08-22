@@ -71,32 +71,9 @@ public:
     // returns the item id and adds the item to the provided CMsgSOMultipleObjects
     // on failure returns 0 and does nothing
     uint64_t PurchaseItem(uint32_t defIndex, std::vector<CMsgSOSingleObject> &update);
-
-private:
-    uint32_t AccountId() const;
-
-    // allocates an empty item, sets id and account_id fields
-    // pass zero as highItemId to generate a new one
-    CSOEconItem &AllocateItem(uint32_t highItemId);
-
     // create a new item of a specific type
     CSOEconItem &CreateItem(const CSOEconItem &copyFrom);
     CSOEconItem &CreateItem(uint32_t defIndex, ItemOrigin origin, UnacknowledgedType unacknowledgedType);
-
-    void ReadFromFile();
-    void ReadItem(const KeyValue &itemKey, CSOEconItem &item) const;
-
-    void WriteToFile() const;
-    void WriteItem(KeyValue &itemKey, const CSOEconItem &item) const;
-
-    // helper, only called via EquipItem
-    bool UnequipItem(uint64_t itemId, CMsgSOMultipleObjects &update);
-    void UnequipItem(uint32_t classId, uint32_t slotId, CMsgSOMultipleObjects &update);
-
-    void DestroyItem(ItemMap::iterator iterator, CMsgSOSingleObject &message);
-
-    // move this to the item schema maybe?
-    void ItemToPreviewDataBlock(const CSOEconItem &item, CEconItemPreviewDataBlock &block);
 
     // helpers for serializing items to CMsgSOMultipleObjects and CMsgSOSingleObject
     void AddToMultipleObjects(CMsgSOMultipleObjects &message, SOTypeId type, const google::protobuf::MessageLite &object);
@@ -122,6 +99,32 @@ private:
     {
         ToSingleObject(message, SOTypeDefaultEquippedDefinitionInstanceClient, object);
     }
+
+private:
+    uint32_t AccountId() const;
+
+    // allocates an empty item, sets id and account_id fields
+    // pass zero as highItemId to generate a new one
+    CSOEconItem &AllocateItem(uint32_t highItemId);
+
+
+
+    void ReadFromFile();
+    void ReadItem(const KeyValue &itemKey, CSOEconItem &item) const;
+
+    void WriteToFile() const;
+    void WriteItem(KeyValue &itemKey, const CSOEconItem &item) const;
+
+    // helper, only called via EquipItem
+    bool UnequipItem(uint64_t itemId, CMsgSOMultipleObjects &update);
+    void UnequipItem(uint32_t classId, uint32_t slotId, CMsgSOMultipleObjects &update);
+
+    void DestroyItem(ItemMap::iterator iterator, CMsgSOSingleObject &message);
+
+    // move this to the item schema maybe?
+    void ItemToPreviewDataBlock(const CSOEconItem &item, CEconItemPreviewDataBlock &block);
+
+
 
     const uint64_t m_steamId;
     ItemSchema m_itemSchema;
