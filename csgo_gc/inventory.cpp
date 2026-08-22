@@ -354,7 +354,7 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
         object->add_object_data(accountClient.SerializeAsString());
         {
             CSOAccountSeasonalOperation seasonalOp;
-            seasonalOp.set_season_value(9);             // всегда 9
+            seasonalOp.set_season_value(10);             // всегда 10
             seasonalOp.set_tier_unlocked(1);            // можно выставить нужные значения
             seasonalOp.set_premium_tiers(1);
             seasonalOp.set_mission_id(1304);
