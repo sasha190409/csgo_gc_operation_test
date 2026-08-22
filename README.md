@@ -9,7 +9,7 @@ In Valve games, the Game Coordinator (GC) is a backend service most notably resp
 ## Why would you want this?
 While it's still possible to connect CS:GO to CS2's GC by spoofing the version number, this may break in the future if Valve updates the GC protocol. This project aims to restore most GC-related functionality without relying on a centralized server.
 
-## Current features
+## Current features 
 - Editable inventory (inventory.txt)
 - Item equipping
 - Opening cases (including sticker capsules, patch packs, graffiti boxes and music kit boxes)
