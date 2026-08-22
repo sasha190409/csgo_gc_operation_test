@@ -71,7 +71,8 @@ enum SOTypeId : uint32_t
     SOTypePersonaDataPublic = 2,
     SOTypeEquipSlot = 3,
     SOTypeGameAccountClient = 7,
-    SOTypeDefaultEquippedDefinitionInstanceClient = 43
+    SOTypeDefaultEquippedDefinitionInstanceClient = 43,
+    SOTypeAccountSeasonalOperation = 44,   // <-- новая константа
 };
 
 // CSOEconItem origin
