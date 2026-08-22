@@ -352,6 +352,20 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
         CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
         object->set_type_id(SOTypeGameAccountClient);
         object->add_object_data(accountClient.SerializeAsString());
+        {
+            CSOAccountSeasonalOperation seasonalOp;
+            seasonalOp.set_season_value(9);             // всегда 9
+            seasonalOp.set_tier_unlocked(1);            // можно выставить нужные значения
+            seasonalOp.set_premium_tiers(1);
+            seasonalOp.set_mission_id(1304);
+            seasonalOp.set_missions_completed(1);
+            seasonalOp.set_redeemable_balance(2147483647);
+            seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr))); // или 0
+
+            CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
+            object->set_type_id(SOTypeAccountSeasonalOperation);
+            object->add_object_data(seasonalOp.SerializeAsString());
+        }
     }
 
     {
