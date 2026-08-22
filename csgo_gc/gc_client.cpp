@@ -96,6 +96,23 @@ void ClientGC::HandleMessage(uint32_t type, const void *data, uint32_t size)
             StorePurchaseFinalize(messageRead);
             break;
 
+        // --- Operation / Mission handlers ---
+        case k_EMsgGCCStrike15_v2_ClientRequestNewMission:
+            OnClientRequestNewMission(messageRead);
+            break;
+
+        case k_EMsgGCCStrike15_v2_ClientRedeemMissionReward:
+            OnClientRedeemMissionReward(messageRead);
+            break;
+
+        case k_EMsgGCCStrike15_v2_GC2ClientInitSystem:
+            OnGC2ClientInitSystem(messageRead);
+            break;
+
+        case k_EMsgGCCStrike15_v2_Client2GCRequestPrestigeCoin:
+            OnClient2GCRequestPrestigeCoin(messageRead);
+            break;
+
         default:
             Platform::Print("ClientGC::HandleMessage: unhandled protobuf message %s\n",
                 MessageName(messageRead.TypeUnmasked()));
@@ -746,4 +763,113 @@ void ClientGC::RemoveItemName(GCMessageRead &messageRead)
     {
         assert(false);
     }
+}
+
+// ----- New mission/operation handlers -----
+
+void ClientGC::OnClientRequestNewMission(GCMessageRead &messageRead)
+{
+    CMsgGCCstrike15_v2_ClientRequestNewMission request;
+    if (!messageRead.ReadProtobuf(request))
+    {
+        Platform::Print("Parsing CMsgGCCstrike15_v2_ClientRequestNewMission failed, ignoring\n");
+        return;
+    }
+
+    // Just acknowledge – send a dummy response (init system response with success)
+    CMsgGCCStrike15_v2_GC2ClientInitSystem_Response response;
+    response.set_success(true);
+    response.set_diagnostic("OK");
+    response.set_einit_result(k_EInitSystemResult_Success);
+    SendMessageToGame(false, k_EMsgGCCStrike15_v2_GC2ClientInitSystem_Response, response, messageRead.JobId());
+}
+
+void ClientGC::OnClientRedeemMissionReward(GCMessageRead &messageRead)
+{
+    CMsgGCCstrike15_v2_ClientRedeemMissionReward request;
+    if (!messageRead.ReadProtobuf(request))
+    {
+        Platform::Print("Parsing CMsgGCCstrike15_v2_ClientRedeemMissionReward failed, ignoring\n");
+        return;
+    }
+
+    // Create a dummy reward item (e.g., a random skin) and send notifications.
+    // For simplicity, we'll just send an empty CMsgSOMultipleObjects and a notification.
+    // In a real implementation you'd create a specific item based on the mission.
+
+    // We could use Inventory::CreateItem with a defindex from config or some default.
+    // For now, just acknowledge with a notification.
+    CMsgGCItemCustomizationNotification notification;
+    notification.set_request(k_EGCItemCustomizationNotification_ClientRedeemMissionReward);
+    // Optionally add an item id if we created one.
+    SendMessageToGame(false, k_EMsgGCItemCustomizationNotification, notification);
+
+    // Also send a CMsgSOMultipleObjects with the newly created item if we wanted.
+    // But the client might expect it; if we don't send, it might not show the reward.
+    // We'll create a dummy item and send it.
+    // We'll use m_inventory.CreateItem with some defindex (e.g., a case or skin).
+    // For demonstration, we'll create a random weapon skin.
+    uint32_t defIndex = 1000; // placeholder – you could get from config
+    // Actually we should parse a loot list or something, but for simplicity we'll just create a common item.
+    // We'll use a spray or something.
+    // Let's create a CSOEconItem and send it.
+
+    // FIXME: better to define a real reward item. For now, we'll create a simple item (like a graffiti).
+    CSOEconItem &newItem = m_inventory.CreateItem(ItemSchema::ItemSprayPaint, ItemOriginPurchased, UnacknowledgedPurchased);
+    // Add some attributes to make it look like a reward.
+    // We'll just set quality and rarity.
+    newItem.set_quality(ItemSchema::QualityNormal);
+    newItem.set_rarity(ItemSchema::RarityCommon);
+
+    CMsgSOSingleObject createMsg;
+    m_inventory.ToSingleObject(createMsg, newItem);
+    SendMessageToGame(true, k_ESOMsg_Create, createMsg); // server and client?
+
+    // Also send to the game client
+    SendMessageToGame(false, k_ESOMsg_Create, createMsg);
+
+    // Additionally, we can send a CMsgGC_ServerQuestUpdateData to update quest progress.
+    // For now, we skip.
+
+    // Finally, send the notification with the new item id.
+    notification.add_item_id(newItem.id());
+    notification.set_request(k_EGCItemCustomizationNotification_ClientRedeemMissionReward);
+    SendMessageToGame(false, k_EMsgGCItemCustomizationNotification, notification);
+}
+
+void ClientGC::OnGC2ClientInitSystem(GCMessageRead &messageRead)
+{
+    CMsgGCCStrike15_v2_GC2ClientInitSystem request;
+    if (!messageRead.ReadProtobuf(request))
+    {
+        Platform::Print("Parsing CMsgGCCStrike15_v2_GC2ClientInitSystem failed, ignoring\n");
+        return;
+    }
+
+    // Respond with success and some dummy system data
+    CMsgGCCStrike15_v2_GC2ClientInitSystem_Response response;
+    response.set_success(true);
+    response.set_diagnostic("System initialized");
+    response.set_einit_result(k_EInitSystemResult_Success);
+    // Optionally set other fields like sha_hash, handle, etc.
+    SendMessageToGame(false, k_EMsgGCCStrike15_v2_GC2ClientInitSystem_Response, response, messageRead.JobId());
+}
+
+void ClientGC::OnClient2GCRequestPrestigeCoin(GCMessageRead &messageRead)
+{
+    CMsgGCCStrike15_v2_Client2GCRequestPrestigeCoin request;
+    if (!messageRead.ReadProtobuf(request))
+    {
+        Platform::Print("Parsing CMsgGCCStrike15_v2_Client2GCRequestPrestigeCoin failed, ignoring\n");
+        return;
+    }
+
+    // Just acknowledge – no real prestige coins in this emulator.
+    // The client expects a response; we can send an empty CMsgGCCStrike15_v2_GC2ClientInitSystem_Response
+    // or just ignore – but to be safe we send a success response.
+    CMsgGCCStrike15_v2_GC2ClientInitSystem_Response response;
+    response.set_success(true);
+    response.set_diagnostic("Prestige coin granted (dummy)");
+    response.set_einit_result(k_EInitSystemResult_Success);
+    SendMessageToGame(false, k_EMsgGCCStrike15_v2_GC2ClientInitSystem_Response, response, messageRead.JobId());
 }
