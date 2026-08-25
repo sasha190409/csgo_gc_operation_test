@@ -379,16 +379,58 @@ void ClientGC::UseItemRequest(GCMessageRead &messageRead)
         return;
     }
 
-    CMsgSOSingleObject destroy;
-    CMsgSOMultipleObjects updateMultiple;
-    CMsgGCItemCustomizationNotification notification;
-
-    if (m_inventory.UseItem(message.item_id(), destroy, updateMultiple, notification))
+    // Получаем предмет из инвентаря
+    const CSOEconItem* item = m_inventory.GetItem(message.item_id());
+    if (!item)
     {
-        SendMessageToGame(true, k_ESOMsg_Destroy, destroy);
-        SendMessageToGame(true, k_ESOMsg_UpdateMultiple, updateMultiple);
+        Platform::Print("Item %llu not found in inventory\n", message.item_id());
+        return;
+    }
 
-        SendMessageToGame(false, k_EMsgGCItemCustomizationNotification, notification);
+    // Определяем тип предмета по def_index
+    if (item->def_index() == ItemSchema::ItemSpray)
+    {
+        // --- Обработка граффити (существующая логика) ---
+        CMsgSOSingleObject destroy;
+        CMsgSOMultipleObjects updateMultiple;
+        CMsgGCItemCustomizationNotification notification;
+
+        if (m_inventory.UseItem(message.item_id(), destroy, updateMultiple, notification))
+        {
+            SendMessageToGame(true, k_ESOMsg_Destroy, destroy);
+            SendMessageToGame(true, k_ESOMsg_UpdateMultiple, updateMultiple);
+            SendMessageToGame(false, k_EMsgGCItemCustomizationNotification, notification);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    else if (item->def_index() == ItemSchema::ItemPass)
+    {
+        // --- Активация пропуска ---
+        CMsgSOSingleObject destroy, update;
+        CMsgGCItemCustomizationNotification notification;
+
+        if (m_inventory.ActivatePass(message.item_id(), destroy, update, notification))
+        {
+            // Отправляем удаление пропуска на сервер и клиенту
+            SendMessageToGame(true, k_ESOMsg_Destroy, destroy);
+            // Отправляем обновление SO (сезонная операция) только клиенту, серверу не нужно
+            SendMessageToGame(false, k_ESOMsg_Update, update);
+            // Уведомление для анимации активации
+            SendMessageToGame(false, k_EMsgGCItemCustomizationNotification, notification);
+        }
+        else
+        {
+            assert(false);
+        }
+    }
+    else
+    {
+        // Другие типы предметов (если понадобятся)
+        Platform::Print("UseItemRequest: unhandled item def_index %u\n", item->def_index());
+        assert(false);
     }
 }
 
