@@ -100,7 +100,7 @@ public:
         ToSingleObject(message, SOTypeDefaultEquippedDefinitionInstanceClient, object);
     }
 
-
+    const CSOEconItem* GetItem(uint64_t itemId) const;
     bool ActivatePass(uint64_t passId,
                         CMsgSOSingleObject &destroy,
                         CMsgSOSingleObject &update,
