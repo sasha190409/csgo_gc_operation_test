@@ -179,7 +179,8 @@ public:
     {
         ItemSpray = 1348,
         ItemSprayPaint = 1349,
-        ItemPatch = 4609
+        ItemPatch = 4609,
+        ItemPass = 4549
     };
 
     enum Attribute
