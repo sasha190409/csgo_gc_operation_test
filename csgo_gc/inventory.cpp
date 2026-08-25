@@ -88,6 +88,13 @@ uint32_t Inventory::AccountId() const
 }
 
 
+const CSOEconItem* Inventory::GetItem(uint64_t itemId) const
+{
+    auto it = m_items.find(itemId);
+    return (it != m_items.end()) ? &it->second : nullptr;
+}
+
+// Активация пропуска
 bool Inventory::ActivatePass(uint64_t passId,
     CMsgSOSingleObject &destroy,
     CMsgSOSingleObject &update,
@@ -100,14 +107,14 @@ bool Inventory::ActivatePass(uint64_t passId,
     // Удаляем использованный пропуск
     DestroyItem(it, destroy);
 
-    // Создаём объект операции с активным премиумом
+    // Создаём объект сезонной операции с активным премиумом
     CSOAccountSeasonalOperation seasonalOp;
-    seasonalOp.set_season_value(9);               // Shattered Web
+    seasonalOp.set_season_value(9);                 // 9 = Shattered Web
     seasonalOp.set_tier_unlocked(1);
-    seasonalOp.set_premium_tiers(1);              // активирован
+    seasonalOp.set_premium_tiers(1);                // активирован
     seasonalOp.set_mission_id(0);
     seasonalOp.set_missions_completed(0);
-    seasonalOp.set_redeemable_balance(2147483647);
+    seasonalOp.set_redeemable_balance(2147483647);  // много звёзд
     seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
 
     // Отправляем обновление SO (тип 44)
@@ -115,11 +122,10 @@ bool Inventory::ActivatePass(uint64_t passId,
 
     // Уведомление об активации
     notification.set_request(k_EGCItemCustomizationNotification_ActivateOperationCoin);
-    notification.add_item_id(passId); // можно передать ID пропуска
+    notification.add_item_id(passId);
 
     return true;
 }
-
 CSOEconItem &Inventory::AllocateItem(uint32_t highItemId)
 {
     // Players fuck up their inventory files constantly and end up with item id collisions...
