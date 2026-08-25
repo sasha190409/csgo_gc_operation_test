@@ -112,7 +112,9 @@ void ClientGC::HandleMessage(uint32_t type, const void *data, uint32_t size)
         case k_EMsgGCCStrike15_v2_Client2GCRequestPrestigeCoin:
             OnClient2GCRequestPrestigeCoin(messageRead);
             break;
-
+        case k_ESOMsg_CacheSubscriptionCheck:
+            OnSOCacheSubscriptionCheck(messageRead);
+            break;
         default:
             Platform::Print("ClientGC::HandleMessage: unhandled protobuf message %s\n",
                 MessageName(messageRead.TypeUnmasked()));
@@ -149,6 +151,20 @@ void ClientGC::HandleMessage(uint32_t type, const void *data, uint32_t size)
             break;
         }
     }
+}
+
+void ClientGC::OnSOCacheSubscriptionCheck(GCMessageRead &messageRead)
+{
+    CMsgSOCacheSubscriptionCheck message;
+    if (!messageRead.ReadProtobuf(message))
+    {
+        Platform::Print("Parsing CMsgSOCacheSubscriptionCheck failed, ignoring\n");
+        return;
+    }
+
+    CMsgSOCacheSubscribed subscribed;
+    m_inventory.BuildCacheSubscription(subscribed, GetConfig().Level(), false);
+    SendMessageToGame(false, k_ESOMsg_CacheSubscribed, subscribed, messageRead.JobId());
 }
 
 void ClientGC::HandleNetMessage(const void *data, uint32_t size)
