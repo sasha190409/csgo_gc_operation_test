@@ -366,27 +366,6 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
             object->set_type_id(SOTypeAccountSeasonalOperation);
             object->add_object_data(seasonalOp.SerializeAsString());
         }
-        {
-            CSOEconItem passItem;
-            passItem.set_id(ComposeItemId(AccountId(), ++m_lastHighItemId));
-            passItem.set_account_id(AccountId());
-            passItem.set_def_index(4549);                 // пропуск Shattered Web
-            passItem.set_quantity(1);
-            passItem.set_level(1);
-            passItem.set_quality(ItemSchema::QualityNormal);
-            passItem.set_origin(ItemOriginPurchased);
-            passItem.set_rarity(ItemSchema::RarityDefault);
-            
-            // Добавляем атрибут "season access" = 8 (defindex 202)
-            CSOEconItemAttribute *attr = passItem.add_attribute();
-            attr->set_def_index(202);
-            attr->set_value(8);
-            
-            // Добавляем предмет в кэш
-            CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
-            object->set_type_id(SOTypeItem);
-            object->add_object_data(passItem.SerializeAsString());
-        }
     }
 
     {
