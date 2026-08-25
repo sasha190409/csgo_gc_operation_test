@@ -354,16 +354,16 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
         object->add_object_data(accountClient.SerializeAsString());
         {
             CSOAccountSeasonalOperation seasonalOp;
-            seasonalOp.set_season_value(8);             // всегда 8
-            seasonalOp.set_tier_unlocked(1);            // можно выставить нужные значения
-            seasonalOp.set_premium_tiers(1);
-            seasonalOp.set_mission_id(1304);
-            seasonalOp.set_missions_completed(1);
-            seasonalOp.set_redeemable_balance(2147483647);
-            seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr))); // или 0
-
+            seasonalOp.set_season_value(9);                    // ключ операции – 9 (Shattered Web)
+            seasonalOp.set_tier_unlocked(1);
+            seasonalOp.set_premium_tiers(1);                   // премиум активирован
+            seasonalOp.set_mission_id(0);                      // можно оставить 0
+            seasonalOp.set_missions_completed(0);
+            seasonalOp.set_redeemable_balance(2147483647);     // максимальное число звёзд
+            seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
+        
             CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
-            object->set_type_id(SOTypeAccountSeasonalOperation);
+            object->set_type_id(SOTypeAccountSeasonalOperation); // 44
             object->add_object_data(seasonalOp.SerializeAsString());
         }
     }
