@@ -100,6 +100,11 @@ public:
         ToSingleObject(message, SOTypeDefaultEquippedDefinitionInstanceClient, object);
     }
 
+
+    bool ActivatePass(uint64_t passId,
+                        CMsgSOSingleObject &destroy,
+                        CMsgSOSingleObject &update,
+                        CMsgGCItemCustomizationNotification &notification);
 private:
     uint32_t AccountId() const;
 
