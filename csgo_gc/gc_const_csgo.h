@@ -72,7 +72,7 @@ enum SOTypeId : uint32_t
     SOTypeEquipSlot = 3,
     SOTypeGameAccountClient = 7,
     SOTypeDefaultEquippedDefinitionInstanceClient = 43,
-    SOTypeAccountSeasonalOperation = 44,   // <-- новая константа
+    SOTypeAccountSeasonalOperation = 41,   // <-- новая константа
 };
 
 // CSOEconItem origin
