@@ -126,7 +126,7 @@ bool Inventory::ActivatePass(uint64_t passId,
     m_seasonalOp.set_missions_completed(0);
 
     // Отправляем обновление SO (тип 44)
-    ToSingleObject(update, SOTypeAccountSeasonalOperation, seasonalOp);
+    ToSingleObject(update, SOTypeAccountSeasonalOperation, m_seasonalOp);
 
     // Уведомление об активации
     notification.set_request(k_EGCItemCustomizationNotification_ActivateOperationCoin);
