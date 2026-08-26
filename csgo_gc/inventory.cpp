@@ -41,6 +41,15 @@ Inventory::Inventory(uint64_t steamId)
     : m_steamId{ steamId }
 {
     ReadFromFile();
+
+    // Начальное состояние операции (не активирован)
+    m_seasonalOp.set_season_value(8);          // Shattered Web
+    m_seasonalOp.set_tier_unlocked(0);
+    m_seasonalOp.set_premium_tiers(0);
+    m_seasonalOp.set_mission_id(0);
+    m_seasonalOp.set_missions_completed(0);
+    m_seasonalOp.set_redeemable_balance(0);
+    m_seasonalOp.set_season_pass_time(0);
 }
 
 Inventory::~Inventory()
@@ -107,15 +116,14 @@ bool Inventory::ActivatePass(uint64_t passId,
     // Удаляем использованный пропуск
     DestroyItem(it, destroy);
 
-    // Создаём объект сезонной операции с активным премиумом
-    CSOAccountSeasonalOperation seasonalOp;
-    seasonalOp.set_season_value(9);                 // 9 = Shattered Web
-    seasonalOp.set_tier_unlocked(1);
-    seasonalOp.set_premium_tiers(1);                // активирован
-    seasonalOp.set_mission_id(0);
-    seasonalOp.set_missions_completed(0);
-    seasonalOp.set_redeemable_balance(2147483647);  // много звёзд
-    seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
+    // Активируем премиум в существующей операции (не меняем season_value)
+    m_seasonalOp.set_premium_tiers(1);
+    m_seasonalOp.set_tier_unlocked(1);                // если нужно разблокировать уровень
+    m_seasonalOp.set_redeemable_balance(2147483647);  // много звёзд
+    m_seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
+    m_seasonalOp.set_season_value(8);                 // 8 = Shattered Web
+    m_seasonalOp.set_mission_id(0);
+    m_seasonalOp.set_missions_completed(0);
 
     // Отправляем обновление SO (тип 44)
     ToSingleObject(update, SOTypeAccountSeasonalOperation, seasonalOp);
@@ -381,29 +389,23 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
 
     if (!server)
     {
+        // ----- SOTypeGameAccountClient -----
         CSOEconGameAccountClient accountClient;
         accountClient.set_additional_backpack_slots(0);
         accountClient.set_bonus_xp_timestamp_refresh(static_cast<uint32_t>(time(nullptr)));
-        accountClient.set_bonus_xp_usedflags(16); // caught cheater lobbies, overwatch bonus etc
+        accountClient.set_bonus_xp_usedflags(16);          // например, caught cheater lobbies, overwatch bonus
         accountClient.set_elevated_state(ElevatedStatePrime);
-        accountClient.set_elevated_timestamp(ElevatedStatePrime); // is this actually 5????
-
+        accountClient.set_elevated_timestamp(ElevatedStatePrime);
+    
         CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
         object->set_type_id(SOTypeGameAccountClient);
         object->add_object_data(accountClient.SerializeAsString());
+    
+        // ----- SOTypeAccountSeasonalOperation (используем m_seasonalOp) -----
         {
-            CSOAccountSeasonalOperation seasonalOp;
-            seasonalOp.set_season_value(8);                    // ключ операции – 8 (Shattered Web)
-            seasonalOp.set_tier_unlocked(1);
-            seasonalOp.set_premium_tiers(1);                   // премиум активирован
-            seasonalOp.set_mission_id(0);                      // можно оставить 0
-            seasonalOp.set_missions_completed(0);
-            seasonalOp.set_redeemable_balance(2147483647);     // максимальное число звёзд
-            seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
-        
             CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
-            object->set_type_id(SOTypeAccountSeasonalOperation); // 44
-            object->add_object_data(seasonalOp.SerializeAsString());
+            object->set_type_id(SOTypeAccountSeasonalOperation);
+            object->add_object_data(m_seasonalOp.SerializeAsString());
         }
     }
 
