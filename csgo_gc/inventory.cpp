@@ -393,7 +393,7 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
         object->add_object_data(accountClient.SerializeAsString());
         {
             CSOAccountSeasonalOperation seasonalOp;
-            seasonalOp.set_season_value(9);                    // ключ операции – 9 (Shattered Web)
+            seasonalOp.set_season_value(8);                    // ключ операции – 8 (Shattered Web)
             seasonalOp.set_tier_unlocked(1);
             seasonalOp.set_premium_tiers(1);                   // премиум активирован
             seasonalOp.set_mission_id(0);                      // можно оставить 0
