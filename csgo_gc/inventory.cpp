@@ -43,12 +43,12 @@ Inventory::Inventory(uint64_t steamId)
     ReadFromFile();
 
     // Начальное состояние операции (не активирован)
-    m_seasonalOp.set_season_value(8);          // Shattered Web
-    m_seasonalOp.set_tier_unlocked(0);
-    m_seasonalOp.set_premium_tiers(0);
+    m_seasonalOp.set_season_value(10);          // Riptide
+    m_seasonalOp.set_tier_unlocked(100);
+    m_seasonalOp.set_premium_tiers(3);
     m_seasonalOp.set_mission_id(0);
     m_seasonalOp.set_missions_completed(0);
-    m_seasonalOp.set_redeemable_balance(0);
+    m_seasonalOp.set_redeemable_balance(10000);
     m_seasonalOp.set_season_pass_time(0);
 }
 
@@ -117,15 +117,15 @@ bool Inventory::ActivatePass(uint64_t passId,
     DestroyItem(it, destroy);
 
     // Активируем премиум в существующей операции (не меняем season_value)
-    m_seasonalOp.set_premium_tiers(1);
-    m_seasonalOp.set_tier_unlocked(1);                // если нужно разблокировать уровень
-    m_seasonalOp.set_redeemable_balance(2147483647);  // много звёзд
+    m_seasonalOp.set_premium_tiers(100);
+    m_seasonalOp.set_tier_unlocked(4);                // если нужно разблокировать уровень
+    m_seasonalOp.set_redeemable_balance(100000);  // много звёзд
     m_seasonalOp.set_season_pass_time(static_cast<uint32_t>(time(nullptr)));
-    m_seasonalOp.set_season_value(8);                 // 8 = Shattered Web
+    m_seasonalOp.set_season_value(10);                 // 10 = Riptide
     m_seasonalOp.set_mission_id(0);
     m_seasonalOp.set_missions_completed(0);
 
-    // Отправляем обновление SO (тип 44)
+    // Отправляем обновление SO (тип 41)
     ToSingleObject(update, SOTypeAccountSeasonalOperation, m_seasonalOp);
 
     // Уведомление об активации
