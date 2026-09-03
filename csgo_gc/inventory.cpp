@@ -406,6 +406,7 @@ void Inventory::BuildCacheSubscription(CMsgSOCacheSubscribed &message, int level
             CMsgSOCacheSubscribed_SubscribedType *object = message.add_objects();
             object->set_type_id(SOTypeAccountSeasonalOperation);
             object->add_object_data(m_seasonalOp.SerializeAsString());
+            Platform::Print("Added SOTypeAccountSeasonalOperation: season=%u, tier=%u, premium=%u, balance=%u\n",
         }
     }
 
